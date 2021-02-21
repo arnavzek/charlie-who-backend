@@ -4,23 +4,33 @@ global.roomsIDs = [];
 
 function getRoomID(req, res, next) {
   let roomID = null;
-  let countryNamespace = emptyRooms[req.geo.country];
-
-  if (!emptyRooms[req.geo.country]) {
+  if (req.private) {
     generateNewRoom();
   } else {
-    let emptyRooms = Object.keys(countryNamespace);
-    if (emptyRooms.length == 0) return generateNewRoom();
-    roomID = Object.keys(countryNamespace)[0];
+    req.private = false;
   }
 
-  res.json({ roomID });
+  if (!Object.keys(global.emptyRooms).length) {
+    generateNewRoom();
+  } else {
+    findRoom(index);
+  }
+
+  function findRoom(index) {
+    if (!index) index = 0;
+    let emptyRoomIDs = Object.keys(global.emptyRooms);
+    if (index > emptyRoomIDs.length - 1) return generateNewRoom();
+    roomID = emptyRoomIDs[index];
+    if (global.emptyRooms[roomID].private) return findRoom(index + 1);
+    res.json({ roomID });
+  }
 
   function generateNewRoom() {
     roomID = generateRoomID();
-    countryNamespace[roomID] = {
-      members: 0,
-      immitatorID: null,
+    global.emptyRooms[roomID] = {
+      members: {},
+      private: req.private,
+      immitatorUserID: null,
     };
 
     res.json({ roomID });

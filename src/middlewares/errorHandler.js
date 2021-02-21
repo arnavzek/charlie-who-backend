@@ -6,7 +6,8 @@ function errorHandler(err, req, res, next) {
     error = err;
   }
   res.status(400);
-  console.log("error handler triggered", error);
+  console.error("error handler triggered", error);
+  global.errors.push(err.message);
   res.json({ error: error.message });
 }
 
