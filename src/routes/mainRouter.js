@@ -1,8 +1,8 @@
 let express = require("express");
 let router = express.Router();
-let getRoomID = require("../controller/getRoomID");
+let apiRouter = require("./apiRouter");
 let showErrors = require("../controller/showErrors");
 
-router.get("/get-room-id", getRoomID);
+router.use("/api/v1", apiRouter);
 router.get("/", showErrors);
 module.exports = router;

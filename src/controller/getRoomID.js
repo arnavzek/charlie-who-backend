@@ -13,7 +13,7 @@ function getRoomID(req, res, next) {
   if (!Object.keys(global.emptyRooms).length) {
     generateNewRoom();
   } else {
-    findRoom(index);
+    findRoom();
   }
 
   function findRoom(index) {

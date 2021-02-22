@@ -1,6 +1,11 @@
 function websocketManager(app) {
   const server = require("http").Server(app);
-  const io = require("socket.io")(server);
+  const io = require("socket.io")(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
 
   io.on("connection", (socket) => {
     socket.on("join-room", (roomID, userID) => {
@@ -59,6 +64,13 @@ function websocketManager(app) {
       }
     });
   });
+
+  const port = process.env.PORT ? process.env.PORT : 8080;
+  server.listen(port, appStarted);
+
+  function appStarted(err) {
+    console.log("App started on port: http://localhost:" + port);
+  }
 }
 
 function getRandomNumber(maxValue) {
