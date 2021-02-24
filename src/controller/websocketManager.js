@@ -29,29 +29,36 @@ function websocketManager(app) {
         delete global.emptyRooms[roomID];
       }
 
+      socket.on("declare-winner", (winningPeerID) => {
+        if (peerID !== room.imitator) return;
+        socket.to(roomID).broadcast.emit("winner-declared", winningPeerID);
+        room.imitator = null;
+        assignimitator(room);
+      });
+
       socket.on("disconnect", () => {
         socket.to(roomID).broadcast.emit("user-disconnected", peerID);
-        let room = null;
+        let room2 = null;
         if (global.emptyRooms[roomID]) {
-          room = global.emptyRooms[roomID];
+          room2 = global.emptyRooms[roomID];
           delete global.emptyRooms[roomID].members[peerID];
         } else {
           if (global.filledRooms[roomID]) {
             delete global.filledRooms[roomID].members[peerID];
-            room = global.filledRooms[roomID];
-            global.emptyRooms[roomID] = room;
+            room2 = global.filledRooms[roomID];
+            global.emptyRooms[roomID] = room2;
             delete global.filledRooms[roomID];
           }
         }
 
-        if (!room) return;
+        if (!room2) return;
 
-        if (room.imitator == peerID) {
+        if (room2.imitator == peerID) {
           socket.to(roomID).broadcast.emit("imitator-disconnected");
-          room.imitator = null;
+          room2.imitator = null;
         }
 
-        assignimitator(room);
+        assignimitator(room2);
       });
 
       function assignimitator(roomObject) {
