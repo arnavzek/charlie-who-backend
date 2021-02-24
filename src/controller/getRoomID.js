@@ -30,7 +30,7 @@ function getRoomID(req, res, next) {
     global.emptyRooms[roomID] = {
       members: {},
       private: req.private,
-      immitatorUserID: null,
+      imitator: null,
     };
 
     res.json({ roomID });
