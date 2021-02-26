@@ -16,7 +16,14 @@ function websocketManager(app) {
       if (!room) return socket.emit("error-message", "Invalid roomID");
 
       room.members[peerID] = { socket };
-      socket.join(roomID);
+
+      try {
+        socket.join(roomID);
+      } catch (e) {
+        console.log("[error]", "join room :", e);
+        socket.emit("error", "couldnt join room");
+      }
+
       if (room.imitator) socket.emit("imitator-selected", peerID);
       socket.to(roomID).broadcast.emit("user-connected", peerID);
 
@@ -29,6 +36,16 @@ function websocketManager(app) {
         delete global.emptyRooms[roomID];
       }
 
+      socket.on("leave-room", () => {
+        onDisconnect();
+        try {
+          socket.leave(roomID);
+        } catch (e) {
+          console.log("[error]", "leave room :", e);
+          socket.emit("error", "couldnt leave room");
+        }
+      });
+
       socket.on("declare-winner", (winningPeerID) => {
         if (peerID !== room.imitator) return;
         socket.to(roomID).broadcast.emit("winner-declared", winningPeerID);
@@ -36,7 +53,7 @@ function websocketManager(app) {
         assignimitator(room);
       });
 
-      socket.on("disconnect", () => {
+      function onDisconnect() {
         socket.to(roomID).broadcast.emit("user-disconnected", peerID);
         let room2 = null;
         if (global.emptyRooms[roomID]) {
@@ -59,7 +76,9 @@ function websocketManager(app) {
         }
 
         assignimitator(room2);
-      });
+      }
+
+      socket.on("disconnect", onDisconnect);
 
       function assignimitator(roomObject) {
         if (roomObject.imitator === null) {

@@ -4,8 +4,9 @@ global.roomsIDs = [];
 
 function getRoomID(req, res, next) {
   let roomID = null;
-  if (req.private) {
+  if (req.query.roomType == "private") {
     generateNewRoom();
+    req.private = true;
   } else {
     req.private = false;
   }
