@@ -7,6 +7,7 @@ function getRoomID(req, res, next) {
   if (req.query.roomType == "private") {
     generateNewRoom();
     req.private = true;
+    return;
   } else {
     req.private = false;
   }
