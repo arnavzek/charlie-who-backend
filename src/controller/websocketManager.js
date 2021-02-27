@@ -24,7 +24,7 @@ function websocketManager(app) {
         socket.emit("error", "couldnt join room");
       }
 
-      if (room.imitator) socket.emit("imitator-selected", peerID);
+      if (room.imitator) socket.emit("imitator-selected", room.imitator);
       socket.to(roomID).broadcast.emit("user-connected", peerID);
 
       if (Object.keys(room.members).length >= 2) {
@@ -50,7 +50,7 @@ function websocketManager(app) {
         if (peerID !== room.imitator) return;
         socket.to(roomID).broadcast.emit("winner-declared", winningPeerID);
         room.imitator = null;
-        assignimitator(room);
+        assignimitator(room, winningPeerID);
       });
 
       function onDisconnect() {
@@ -80,7 +80,7 @@ function websocketManager(app) {
 
       socket.on("disconnect", onDisconnect);
 
-      function assignimitator(roomObject) {
+      function assignimitator(roomObject, pickedUserPeerID) {
         if (roomObject.imitator === null) {
           let peerIDs = Object.keys(roomObject.members);
           let numberOfMembers = peerIDs.length;
@@ -89,10 +89,12 @@ function websocketManager(app) {
               "error-message",
               "0 member, can't choose immitator"
             );
-          let userToPick = getRandomNumber(numberOfMembers - 1);
-          let pickedUserPeerID = peerIDs[userToPick];
+          if (!pickedUserPeerID) {
+            let userToPick = getRandomNumber(numberOfMembers - 1);
+            pickedUserPeerID = peerIDs[userToPick];
+          }
           roomObject.imitator = pickedUserPeerID;
-          console.log("found an imitator", peerIDs, userToPick);
+
           socket.emit("imitator-selected", pickedUserPeerID);
           socket
             .to(roomID)
