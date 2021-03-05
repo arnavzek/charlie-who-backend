@@ -12,8 +12,16 @@ function websocketManager(app) {
       if (!peerID) return socket.emit("error-message", "peerID missing");
       if (!roomID) return socket.emit("error-message", "roomID missing");
 
+      if (!global.emptyRooms[roomID] && !global.filledRooms[roomID]) {
+        global.emptyRooms[roomID] = {
+          members: {},
+          private: true,
+          imitator: null,
+        };
+      }
+
       let room = global.emptyRooms[roomID];
-      if (!room) return socket.emit("error-message", "Invalid roomID");
+      if (!room) return socket.emit("error-message", "Room is completely full");
 
       room.members[peerID] = { socket };
 
